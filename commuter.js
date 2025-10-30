@@ -6,7 +6,7 @@ window.onload = function() {
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("GET", url, true);
   xmlhttp.send();
-
+//käsitellään vastaus
   xmlhttp.onreadystatechange = function() {
     if (xmlhttp.readyState == 4) {
       if (xmlhttp.status == 200) {
@@ -50,7 +50,7 @@ function haeData(stationCode) {
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("GET", url, true);
   xmlhttp.send();
-
+//käsitellään vastaus
   xmlhttp.onreadystatechange = function() {
     if (xmlhttp.readyState == 4) {
       if (xmlhttp.status == 200) {
@@ -80,15 +80,16 @@ function naytaData(json) {
       <th>Lähtöaika</th>
       <th>Tila</th>
     </tr>`;
-
+//käydään junat läpi jotka haettu apista
   for (let juna of json) {
+//poimitaan niistä tärkeimmät tiedot kuten lähtö, määränpää, aika, tila
     let tyyppi = juna.trainType + juna.trainNumber;
     let lahto = juna.timeTableRows[0].stationShortCode;
     let maali = juna.timeTableRows[juna.timeTableRows.length - 1].stationShortCode;
     let lahtoaika = new Date(juna.timeTableRows[0].scheduledTime)
       .toLocaleTimeString("fi-FI", {hour: "2-digit", minute: "2-digit"});
     let tila = juna.runningCurrently ? "Liikenteessä" : "Ei liikenteessä";
-
+//lisätään tiedot taulukkoon
     rivit += `
       <tr>
         <td>${tyyppi}</td>
