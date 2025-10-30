@@ -2,17 +2,21 @@ let kaikkiAsemat = [];
 
 // Haetaan asematiedot heti sivun latautuessa
 window.onload = function() {
-  let url = "https://rata.digitraffic.fi/api/v1/metadata/stations";
+  let url = "https://corsproxy.io/?https://rata.digitraffic.fi/api/v1/metadata/stations";
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("GET", url, true);
   xmlhttp.send();
-// Käsitellään vastaus
+
   xmlhttp.onreadystatechange = function() {
-    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-      let json = JSON.parse(xmlhttp.responseText);
-      kaikkiAsemat = json.filter(s => s.passengerTraffic);
-      paivitaAsemaValinta(kaikkiAsemat);
-      document.getElementById("tulokset").innerHTML = "Valitse asema nähdäksesi junat.";
+    if (xmlhttp.readyState == 4) {
+      if (xmlhttp.status == 200) {
+        let json = JSON.parse(xmlhttp.responseText);
+        kaikkiAsemat = json.filter(s => s.passengerTraffic);
+        paivitaAsemaValinta(kaikkiAsemat);
+        document.getElementById("tulokset").innerHTML = "Valitse asema nähdäksesi junat.";
+      } else {
+        document.getElementById("tulokset").innerHTML = "Virhe asematietojen haussa.";
+      }
     }
   };
 };
@@ -38,20 +42,23 @@ function suodataAsemat() {
 
 // Hae aseman junatiedot AJAX-kutsulla
 function haeData(stationCode) {
-
   if (stationCode == "") return;
   document.getElementById("tulokset").innerHTML = `Haetaan tietoja asemalle ${stationCode}...`;
 
-  let url = `https://rata.digitraffic.fi/api/v1/live-trains/station/${stationCode}?departing_trains=5&arriving_trains=5`;
+  let url = `https://corsproxy.io/?https://rata.digitraffic.fi/api/v1/live-trains/station/${stationCode}?departing_trains=5&arriving_trains=5`;
 
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("GET", url, true);
   xmlhttp.send();
-// Käsitellään vastaus
+
   xmlhttp.onreadystatechange = function() {
-    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-      let json = JSON.parse(xmlhttp.responseText);
-      naytaData(json);
+    if (xmlhttp.readyState == 4) {
+      if (xmlhttp.status == 200) {
+        let json = JSON.parse(xmlhttp.responseText);
+        naytaData(json);
+      } else {
+        document.getElementById("tulokset").innerHTML = "Virhe junatietojen haussa.";
+      }
     }
   };
 }
@@ -78,7 +85,8 @@ function naytaData(json) {
     let tyyppi = juna.trainType + juna.trainNumber;
     let lahto = juna.timeTableRows[0].stationShortCode;
     let maali = juna.timeTableRows[juna.timeTableRows.length - 1].stationShortCode;
-    let lahtoaika = new Date(juna.timeTableRows[0].scheduledTime).toLocaleTimeString("fi-FI", {hour: "2-digit", minute: "2-digit"});
+    let lahtoaika = new Date(juna.timeTableRows[0].scheduledTime)
+      .toLocaleTimeString("fi-FI", {hour: "2-digit", minute: "2-digit"});
     let tila = juna.runningCurrently ? "Liikenteessä" : "Ei liikenteessä";
 
     rivit += `
